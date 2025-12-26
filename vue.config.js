@@ -44,5 +44,26 @@ module.exports = defineConfig({
       maskIcon: 'icons/safari-pinned-tab.svg',
       msTileImage: 'icons/mstile-144x144.png'
     }
+  },
+  pluginOptions: {
+    electronBuilder: {
+      nodeIntegration: true,
+      builderOptions: {
+        productName: "RandomTube",
+        appId: "com.randomtube.app",
+        win: {
+          icon: "public/splash_screens/icon.png",
+          target: [
+            "nsis",
+            "portable"
+          ]
+        },
+        nsis: {
+          oneClick: false,
+          perMachine: true,
+          allowToChangeInstallationDirectory: true
+        }
+      }
+    }
   }
 })
