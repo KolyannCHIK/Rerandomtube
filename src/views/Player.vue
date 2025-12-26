@@ -108,15 +108,7 @@ export default {
 
       hasAudio: true,
       waitingTimer: null,
-      needUpdate: false,
-
-      videoFilters: {
-        grayscale: 0,
-        sepia: 0,
-        invert: 0,
-        brightness: 1,
-        contrast: 1
-      }
+      needUpdate: false
     }
   },
   mounted() {
@@ -168,14 +160,7 @@ export default {
       return {
         style: {
           '--width': this.currentFile.width,
-          '--height': this.currentFile.height,
-          'filter': `
-            grayscale(${this.videoFilters.grayscale}) 
-            sepia(${this.videoFilters.sepia}) 
-            invert(${this.videoFilters.invert}) 
-            brightness(${this.videoFilters.brightness}) 
-            contrast(${this.videoFilters.contrast})
-          `
+          '--height': this.currentFile.height
         },
 
         preload:  this.options.preload,
@@ -281,12 +266,6 @@ export default {
             disabled: !this.currentFile || this._checkPictureInPicture()
           },
           {
-            icon: 'magic-line',
-            label: this.$t('player.bar.effects'),
-            action: () => { this.showEffects() },
-            disabled: !this.currentFile
-          },
-          {
             icon: 'speed-up-fill',
             label: this.$t('player.bar.playback-rate'),
             action: () => { this.showPlaybackRate() },
@@ -319,12 +298,6 @@ export default {
             disabled: !this.currentFile
           },
           {
-            icon: 'camera-fill',
-            label: this.$t('player.bar.snapshot'),
-            action: this.takeSnapshot,
-            disabled: !this.currentFile
-          },
-          {
             icon: 'error-warning-line',
             label: this.$t('player.bar.report'),
             action: this.reportItem,
@@ -348,45 +321,6 @@ export default {
           action: () => { this.showOptions() }
         },
         ...items
-      ]
-    },
-    effectsItems() {
-      return [
-        {
-          icon: 'arrow-left-s-line',
-          label: this.$t('player.bar.effects'),
-          action: () => { this.showOptions() }
-        },
-        {
-          label: this.$t('player.effects.reset'),
-          icon: 'refresh-line',
-          action: this.resetEffects
-        },
-        {
-          label: this.$t('player.effects.grayscale') + (this.videoFilters.grayscale ? ' (On)' : ''),
-          icon: 'contrast-drop-line',
-          action: () => this.toggleFilter('grayscale')
-        },
-        {
-          label: this.$t('player.effects.sepia') + (this.videoFilters.sepia ? ' (On)' : ''),
-          icon: 'sepia-line',
-          action: () => this.toggleFilter('sepia')
-        },
-        {
-          label: this.$t('player.effects.invert') + (this.videoFilters.invert ? ' (On)' : ''),
-          icon: 'invert-line', // Assuming this icon exists or similar
-          action: () => this.toggleFilter('invert')
-        },
-        {
-          label: `${this.$t('player.effects.brightness')}: ${(this.videoFilters.brightness * 100).toFixed(0)}%`,
-          icon: 'sun-line',
-          action: this.cycleBrightness
-        },
-        {
-          label: `${this.$t('player.effects.contrast')}: ${(this.videoFilters.contrast * 100).toFixed(0)}%`,
-          icon: 'contrast-line',
-          action: this.cycleContrast
-        }
       ]
     }
   },
@@ -756,15 +690,6 @@ export default {
       })
     },
 
-    showEffects(e) {
-      let target = typeof e == "object" ? e.currentTarget : this.$refs.options.$el
-      this.$popover.open({
-        items: this.effectsItems,
-        target: target,
-        align: 'right'
-      })
-    },
-
     showOptions(e) {
       let target = typeof e == "object" ? e.currentTarget : this.$refs.options.$el
       this.$popover.open({
@@ -819,64 +744,8 @@ export default {
         'event_label': 'openKeybindingsModal'
       })
     },
-
-    toggleFilter(filter) {
-      this.videoFilters[filter] = this.videoFilters[filter] ? 0 : 1
-    },
-
-    cycleBrightness() {
-      let val = this.videoFilters.brightness
-      val += 0.25
-      if (val > 1.5) val = 0.5
-      this.videoFilters.brightness = val
-    },
-
-    cycleContrast() {
-      let val = this.videoFilters.contrast
-      val += 0.25
-      if (val > 1.5) val = 0.5
-      this.videoFilters.contrast = val
-    },
-
-    resetEffects() {
-      this.videoFilters = {
-        grayscale: 0,
-        sepia: 0,
-        invert: 0,
-        brightness: 1,
-        contrast: 1
-      }
-    },
-
-    takeSnapshot() {
-      const video = this.$video
-      const canvas = document.createElement('canvas')
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      const ctx = canvas.getContext('2d')
-      
-      // Apply filters to context if supported (optional, complex for canvas)
-      // For now, just raw snapshot
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-      
-      try {
-        canvas.toBlob((blob) => {
-          const url = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = `snapshot_${Date.now()}.png`
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-          URL.revokeObjectURL(url)
-          this.$alerts.success({ text: 'Скриншот сохранен' })
-        })
-      } catch (e) {
-        this.$alerts.danger({ text: 'Ошибка создания скриншота' })
-      }
-      this.$popover.close()
-    },
     
+
     /**
      * Ну тут все ясно
      */
@@ -1063,7 +932,6 @@ export default {
   max-height: var(--x-player-video-max-height);
   z-index: 0;
   cursor: pointer;
-  transition: filter 0.3s ease;
 
   &.--width {
     /* Находим соотношение сторон */
